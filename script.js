@@ -1,7 +1,9 @@
 const calculator = document.querySelector('.calculator');
 const keys = document.querySelector('.calculator__keys');
-const display = document.querySelector('.calculator__display');
+const display = document.querySelector('.calculator__input');
 const result = document.querySelector('.calculator__result');
+
+let string = '';
 
 keys.addEventListener('click', event => {
   if (event.target.matches('button')) {
@@ -10,65 +12,55 @@ keys.addEventListener('click', event => {
     const keyContent = key.textContent;
     const displayedNum = display.value;
 
-    const calculate = (num1, op, num2) => {
-      let res = ''
-      switch (op) {
-        case 'add':
-          res = parseFloat(num1) + parseFloat(num2);
-          break;
-
-        case 'subtract':
-          res = parseFloat(num1) - parseFloat(num2);
-          break;
-
-        case 'multiply':
-          res = parseFloat(num1) * parseFloat(num2);
-          break;
-
-        case 'divide':
-          res = parseFloat(num1) / parseFloat(num2);
-          break;
-
-        default: 
-          res = result.value;
-      }
-      return res;
-    }
-
     const previousKeyType = calculator.dataset.previousKeyType;
 
     if (!action) {
       displayedNum === "Input" || previousKeyType === "operator" ? 
       display.value = keyContent : display.value = displayedNum + keyContent;
-      
-      console.log('CONTENT', display.value)
       calculator.dataset.previousKeyType = null;
+      string += key.textContent;
     }
 
-    if (action === 'clear' || action === 'delete') {
-      window.location.reload()
+    if (action === 'clear') {
+      display.value = "Input";
+      result.value = "Result";
+      string = '';
+    }
+
+    if (action === 'delete') {
+      string = string.slice(0, -1)
+      display.value = string.length === 0 ? "Input" : string;
     }
 
     if (action === "decimal" && !displayedNum.includes('.')) {
       display.value = `${displayedNum}.`
+      string += key.textContent;
     }
 
     if (
       action === 'add' ||
       action === 'subtract' ||
-      action === 'multiply' ||
       action === 'divide'
     ) {
-      calculator.dataset.previousKeyType = 'operator';
-      calculator.dataset.firstValue = displayedNum;
-      calculator.dataset.operator = action;
+      string += key.textContent;
+      display.value = string;
+    }
+
+    if (action === 'multiply') {
+      string += '*';
+      display.value = string;
+    }
+
+    if (action === 'intermediate') {
+      if (string.length > 0) {
+        string = eval(string).toString();
+        display.value = string;
+        result.value = string;
+      }
     }
 
     if (action === 'calculate') {
-      const firstValue = calculator.dataset.firstValue;
-      const secondValue = displayedNum;
-      const operator = calculator.dataset.operator;
-      result.value = calculate(firstValue, operator, secondValue)
+      display.value !== "Input" && display.value.length > 0 ? result.value = eval(string) : result.value = "Result";
     }
   }
 })
