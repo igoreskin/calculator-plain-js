@@ -4,6 +4,7 @@ const display = document.querySelector('.calculator__input');
 const result = document.querySelector('.calculator__result');
 
 let string = '';
+const operators = ['+', '-', '*', '/'];
 
 keys.addEventListener('click', event => {
   if (event.target.matches('button')) {
@@ -12,12 +13,9 @@ keys.addEventListener('click', event => {
     const keyContent = key.textContent;
     const displayedNum = display.value;
 
-    const previousKeyType = calculator.dataset.previousKeyType;
-
     if (!action) {
-      displayedNum === "Input" || previousKeyType === "operator" ? 
+      displayedNum === "Input" ? 
       display.value = keyContent : display.value = displayedNum + keyContent;
-      calculator.dataset.previousKeyType = null;
       string += key.textContent;
     }
 
@@ -33,22 +31,22 @@ keys.addEventListener('click', event => {
     }
 
     if (action === "decimal" && !displayedNum.includes('.')) {
-      display.value = `${displayedNum}.`
+      display.value = `${displayedNum}.`;
       string += key.textContent;
     }
 
     if (
-      action === 'add' ||
+      (action === 'add' ||
       action === 'subtract' ||
-      action === 'divide'
-    ) {
+      action === 'divide') && !operators.includes(string[string.length - 1])
+    )  {
       string += key.textContent;
       display.value = string;
     }
 
-    if (action === 'multiply') {
-      string += '*';
-      display.value = string;
+    if (action === 'multiply' && !operators.includes(string[string.length - 1])) {
+        string += '*';
+        display.value = string;
     }
 
     if (action === 'intermediate') {
@@ -61,6 +59,8 @@ keys.addEventListener('click', event => {
 
     if (action === 'calculate') {
       display.value !== "Input" && display.value.length > 0 ? result.value = eval(string) : result.value = "Result";
+      display.value = "Input";
+      string = '';
     }
   }
 })
